@@ -1,0 +1,18 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+*.log
+
+# Producto generado (Nivel 2): nunca commitear el output de una corrida
+generated/
+
+# ADK dev UI session store (adk web), never commit
+.adk/

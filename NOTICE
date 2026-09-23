@@ -1,0 +1,28 @@
+NOTICE
+
+vibeathon-builder-agents
+Copyright 2026
+
+Este repositorio reutiliza el patron de arquitectura (agentes ADK con
+instruction.md, AgentTool para capacidades locales, A2A/JSON-RPC para servicios
+separados, herramientas deterministicas y tests offline) del proyecto:
+
+  Multi-Agent-Marathon-Planner-Workshop
+  https://github.com/jorgeucano/Multi-Agent-Marathon-Planner-Workshop
+
+distribuido bajo la licencia Apache 2.0. No se copio codigo literal ni ningun
+contenido del dominio "maraton"; solo se replico la estructura y las
+convenciones de ingenieria. El dominio aqui es la generacion de codigo para la
+transcripcion simultanea de conferencias (Vibeathon Nerdearla 2026).
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
