@@ -1,4 +1,4 @@
-.PHONY: help install preflight build build-full planner backend frontend test test-offline clean
+.PHONY: help install preflight build build-full planner backend frontend test test-offline clean deploy-setup deploy-build deploy-run deploy-pull
 
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -33,3 +33,15 @@ test-offline:  ## sin deps pesadas; solo las tools deterministas
 clean:
 	find . -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
 	rm -rf .pytest_cache
+
+deploy-setup:  ## Cloud Run: APIs + SA + Artifact Registry + bucket (una vez)
+	bash infra/deploy.sh setup
+
+deploy-build:  ## Cloud Run: compilar y subir las 4 imagenes
+	bash infra/deploy.sh build
+
+deploy-run:  ## Cloud Run: job generate-mvp (agentes generan el MVP en GCS)
+	bash infra/deploy.sh run
+
+deploy-pull:  ## Cloud Run: bajar el MVP generado y comprimirlo en zip
+	bash infra/deploy.sh pull

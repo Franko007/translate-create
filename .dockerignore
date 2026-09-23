@@ -1,0 +1,13 @@
+.git/
+generated/
+downloads/
+__pycache__/
+.pytest_cache/
+.venv/
+uv.lock
+*.pyc
+docs/
+tests/
+Makefile
+.env
+.vscode/

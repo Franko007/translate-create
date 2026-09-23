@@ -35,7 +35,8 @@ uv run python scripts/build_project.py
 
 Eso genera el proyecto final bajo `generated/nerdearla-subtitles/` con el
 pipeline de punta a punta. Para ver cada agente por separado como servicio A2A
-(Cloud Run), ver `docs/HOW_TO_RUN.md`.
+(Cloud Run), ver `docs/HOW_TO_RUN.md`. Para correr los agentes directamente en
+Google Cloud y bajar el MVP generado en zip: `docs/DEPLOY_GCP.md`.
 
 - Guia de diseño completa: `vibeathon_builder_agents_prompt.md`
 - Brief del producto que los agentes reciben: `spec/PRODUCT_BRIEF.md`

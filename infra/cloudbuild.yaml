@@ -1,0 +1,23 @@
+# Cloud Build: empaqueta los 4 targets del Nivel 1 y los sube a Artifact Registry.
+#
+#   gcloud builds submit . --config infra/cloudbuild.yaml \
+#     --substitutions _REGION=us-central1,_REPO=agents,_TAG=20260924
+#
+# Substituciones requeridas: _REGION, _REPO, _TAG
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        for t in planner backend frontend job; do
+          docker build --target "$t" -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/$t:${_TAG} .
+        done
+
+images:
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/planner:${_TAG}"
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/backend:${_TAG}"
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/frontend:${_TAG}"
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/job:${_TAG}"

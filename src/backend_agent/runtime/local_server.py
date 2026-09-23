@@ -23,7 +23,9 @@ from a2a.types import TransportProtocol  # noqa: E402
 
 from src.config import BACKEND_PORT
 
-AGENT_PORT = int(os.environ.get("BACKEND_PORT", BACKEND_PORT))
+AGENT_HOST = os.environ.get("HOST", "0.0.0.0")  # Cloud Run exige 0.0.0.0
+AGENT_PORT = int(os.environ.get("PORT") or os.environ.get("BACKEND_PORT", BACKEND_PORT))
+PUBLIC_URL = os.environ.get("AGENT_PUBLIC_URL", f"http://127.0.0.1:{AGENT_PORT}")
 
 
 async def run_server():
@@ -35,16 +37,16 @@ async def run_server():
     print("Backend Agent A2A server (implementa el pipeline backend)")
 
     card = create_backend_card()
-    card.url = f"http://127.0.0.1:{AGENT_PORT}"
+    card.url = PUBLIC_URL
     card.preferred_transport = TransportProtocol.jsonrpc
 
     executor = BackendExecutor()
     handler = DefaultRequestHandler(agent_executor=executor, task_store=InMemoryTaskStore())
     app = A2AStarletteApplication(agent_card=card, http_handler=handler)
-    config = uvicorn.Config(app.build(), host="127.0.0.1", port=AGENT_PORT, log_level="info", loop="none")
+    config = uvicorn.Config(app.build(), host=AGENT_HOST, port=AGENT_PORT, log_level="info", loop="none")
 
-    print(f"Backend A2A: http://127.0.0.1:{AGENT_PORT}")
-    print(f"Agent card:  http://127.0.0.1:{AGENT_PORT}/.well-known/agent-card.json")
+    print(f"Backend A2A: http://{AGENT_HOST}:{AGENT_PORT}")
+    print(f"Agent card:  {PUBLIC_URL}/.well-known/agent-card.json")
     server = uvicorn.Server(config)
     await server.serve()
 

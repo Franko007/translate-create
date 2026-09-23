@@ -14,5 +14,9 @@ dist/
 # Producto generado (Nivel 2): nunca commitear el output de una corrida
 generated/
 
+# Descargas del job en la nube (deploy.sh pull)
+downloads/
+*.zip
+
 # ADK dev UI session store (adk web), never commit
 .adk/
