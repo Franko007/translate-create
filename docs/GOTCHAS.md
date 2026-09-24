@@ -2,14 +2,15 @@
 
 ## Cloud Run
 
-- Los executors y agent_cards importan `vertexai`/`google.adk` de forma lazy
-  (primer task / dentro de la funcion): el container bindea `0.0.0.0:$PORT` al
-  toque y no muere el startupProbe de Cloud Run. NO vuelvas a importarlos al
-  nivel de modulo, o reviviras el "failed to start and listen on PORT=8080".
+- Los executors y agent_cards NO importan `vertexai`/`google.adk` al arrancar:
+  se importan recien en el primer task (executors) o directamente no se usan
+  (cards, que arman el AgentCard a mano). Si reintroducis esa import a nivel de
+  modulo, revivirás el "failed to start and listen on PORT=8080".
 - El server escucha en `0.0.0.0` con el puerto de `$PORT` (Cloud Run inyecta
   `8080`); nunca hardcodees `127.0.0.1` en un container.
 - `infra/service.yaml.tpl` lleva `startupProbe` TCP (300 s) + startup-cpu-boost;
-  si un agente tarda mas, subi el probe o la RAM/CPU del servicio.
+  si un agente tarda mas, subi el probe o la RAM/CPU del servicio. El primer
+  task (ADK+vertexai en memoria) necesita ~1-2 GiB.
 
 ## Deploy/entorno
 

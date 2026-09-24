@@ -14,7 +14,7 @@
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:-high-magpie-509513-b6}"
-REGION="${REGION:-us-central1}"
+REGION="${REGION:-europe-west1}"
 REPO="${REPO:-agents}"
 BUCKET="${BUCKET:-${PROJECT_ID}-mvp}"
 TAG="${TAG:-$(date +%Y%m%d%H%M%S)}"
@@ -100,6 +100,10 @@ metadata:
     cloud.googleapis.com/location: {region}
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "1"
+        run.googleapis.com/startup-cpu-boost: "true"
     spec:
       containerConcurrency: 1
       timeoutSeconds: 3600
@@ -115,10 +119,22 @@ spec:
               value: "true"
             - name: APPROVAL_MODE
               value: "yes"
+            - name: PORT
+              value: "8080"
             - name: BACKEND_AGENT_RESOURCE_NAME
               value: {be}
             - name: FRONTEND_AGENT_RESOURCE_NAME
               value: {fe}
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 300
+            periodSeconds: 1
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
 """
 open("/tmp/planner.dist.yaml", "w").write(yaml)
 PY

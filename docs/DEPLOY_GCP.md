@@ -1,6 +1,6 @@
 # Deploy en Google Cloud Run
 
-Proyecto: `high-magpie-509513-b6` (region por default `us-central1`). Los
+Proyecto: `high-magpie-509513-b6` (region `europe-west1`). Los
 agentes ya viven en este repo; el deploy compila 4 imagenes y las corre en
 Cloud Run. El que te interesa para "correr los agentes y que generen el MVP"
 es el **job `generate-mvp`**: en una sola ejecucion corre el planner + los
@@ -91,7 +91,7 @@ docker build --target job -t gcr.io/high-magpie-509513-b6/generate-mvp .
 docker push gcr.io/high-magpie-509513-b6/generate-mvp
 gcloud run jobs create generate-mvp \
   --image=gcr.io/high-magpie-509513-b6/generate-mvp \
-  --region=us-central1 --service-account=nivel1-builder \
+  --region=europe-west1 --service-account=nivel1-builder \
   --set-env-vars=GOOGLE_CLOUD_PROJECT=high-magpie-509513-b6,GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_VERTEXAI=true,APPROVAL_MODE=yes,MAX_FIX_ITERATIONS=3,MAX_TOKENS_BUDGET=200000,OUT_DIR=/mnt/outs/generated/nerdearla-subtitles
 gcloud run jobs update generate-mvp \
   --add-volume=outs=bucket=high-magpie-509513-b6-mvp \
@@ -120,10 +120,18 @@ Fixes ya aplicados en el repo:
 - Los executors (`src/*/runtime/agent_executor.py`) importan
   `vertexai`/`google.adk` recien en el primer task (lazy); el server bindea en
   `0.0.0.0:$PORT` en segundos.
-- Los `agent_card.py` importan `vertexai` adentro de la funcion (no al importar
-  el modulo).
+- Los `agent_card.py` YA NO importan vertexai: el AgentCard se arma a mano con
+  `a2a.types` (misma forma que el helper de `vertexai.preview...`). En el
+  path de startup solo quedan imports livianos (uvicorn, a2a-sdk, pydantic).
 - `infra/service.yaml.tpl` suma `startupProbe` TCP (timeout 300 s) y
   `run.googleapis.com/startup-cpu-boost: "true"`.
+
+Si deployas un servicio a mano (no via `deploy.sh services`) dale memoria
+suficiente: el primer task importa ADK/vertexai y usa 1-2 GiB.
+
+```bash
+gcloud run services update <servicio> --memory=2Gi --cpu=2 --region europe-west1
+```
 
 Despues de tocar codigo recorda recompilar con un tag nuevo y redeployar:
 
@@ -135,5 +143,5 @@ bash infra/deploy.sh services     # redeploya con la nueva imagen
 Mirar logs del servicio:
 
 ```bash
-gcloud run services logs read <backend|frontend|planner> --region us-central1 --limit 50
+gcloud run services logs read <backend|frontend|planner> --region europe-west1 --limit 50
 ```

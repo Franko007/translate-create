@@ -1,7 +1,7 @@
 # Cloud Build: empaqueta los 4 targets del Nivel 1 y los sube a Artifact Registry.
 #
 #   gcloud builds submit . --config infra/cloudbuild.yaml \
-#     --substitutions _REGION=us-central1,_REPO=agents,_TAG=20260924
+#     --substitutions _REGION=europe-west1,_REPO=agents,_TAG=20260924
 #
 # Substituciones requeridas: _REGION, _REPO, _TAG
 
