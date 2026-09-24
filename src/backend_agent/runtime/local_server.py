@@ -32,9 +32,8 @@ async def run_server():
     from .agent_card import create_backend_card
     from .agent_executor import BackendExecutor
 
-    from ..agent import root_agent
-
     print("Backend Agent A2A server (implementa el pipeline backend)")
+    print("El agente (ADK/vertexai) se inicializa al recibir el primer task.")
 
     card = create_backend_card()
     card.url = PUBLIC_URL

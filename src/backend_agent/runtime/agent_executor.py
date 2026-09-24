@@ -1,19 +1,19 @@
-"""A2A Agent Executor for the Backend Agent."""
+"""A2A Agent Executor for the Backend Agent.
 
-import logging
+Imports pesados (vertexai, google.adk) diferidos a ``_init_agent`` (primer
+request): el container bindea el puerto rapido y sobrevive el startup probe.
+"""
+
 import json
+import logging
 import os
 
-import vertexai
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import TaskState, TextPart, UnsupportedOperationError
 from a2a.utils import new_agent_text_message
 from a2a.utils.errors import ServerError
-from google.adk import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +34,20 @@ class BackendExecutor(AgentExecutor):
         self.runner = None
 
     def _init_agent(self) -> None:
+        import vertexai
+        from google.adk import Runner
+        from google.adk.sessions import InMemorySessionService
+
         if self.agent is None:
             from ..agent import root_agent
-
-            project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-            if project_id:
-                vertexai.init(
-                    project=project_id,
-                    location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
-                )
             self.agent = root_agent
+
+        project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
+        if project_id:
+            vertexai.init(
+                project=project_id,
+                location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+            )
         if self.runner is None:
             self.runner = Runner(
                 app_name=self.agent.name,
@@ -63,6 +67,8 @@ class BackendExecutor(AgentExecutor):
             await updater.update_status(TaskState.failed, message=new_agent_text_message("No data"), final=True)
             return
         try:
+            from google.genai import types
+
             content = types.Content(role="user", parts=[types.Part(text=request_data)])
             final = None
             async for event in self.runner.run_async(

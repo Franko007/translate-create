@@ -40,12 +40,7 @@ async def run_server():
     print("Planner Agent (orquestador) A2A server")
     print(f"Mode: backend={'a2a' if os.environ.get('BACKEND_AGENT_RESOURCE_NAME') else 'local'} "
           f"frontend={'a2a' if os.environ.get('FRONTEND_AGENT_RESOURCE_NAME') else 'local'}")
-    print("=" * 60)
-
-    from ..agent import root_agent
-
-    print(f"Agent:  {root_agent.name} ({root_agent.model})")
-    print(f"Tools:  {[getattr(t, 'name', type(t).__name__) for t in root_agent.tools]}")
+    print("El agente (ADK/vertexai) se inicializa al recibir el primer task.")
     print("=" * 60)
 
     card = create_planner_card()

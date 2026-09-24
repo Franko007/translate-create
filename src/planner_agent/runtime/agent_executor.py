@@ -1,18 +1,20 @@
-"""A2A Agent Executor for the Planner Agent."""
+"""A2A Agent Executor for the Planner Agent.
 
+Los imports pesados (vertexai, google.adk, google.genai) se resuelven recien en
+``_init_agent`` (primer request) para que el server bindee el puerto al toque y
+no se muera el startup del container en Cloud Run.
+"""
+
+import json
 import logging
 import os
 
-import vertexai
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import TaskState, TextPart, UnsupportedOperationError
 from a2a.utils import new_agent_text_message
 from a2a.utils.errors import ServerError
-from google.adk import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +42,19 @@ class PlannerExecutor(AgentExecutor):
         self.runner = None
 
     def _init_agent(self) -> None:
+        import vertexai
+        from google.adk import Runner
+        from google.adk.sessions import InMemorySessionService
+
         if self.agent is None:
             from ..agent import root_agent
 
-            project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-            location = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
-            if project_id:
-                vertexai.init(project=project_id, location=location)
             self.agent = root_agent
+
+        project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
+        location = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
+        if project_id:
+            vertexai.init(project=project_id, location=location)
 
         if self.runner is None:
             self.runner = Runner(
@@ -71,6 +78,8 @@ class PlannerExecutor(AgentExecutor):
             return
 
         try:
+            from google.genai import types
+
             await updater.update_status(TaskState.working, message=new_agent_text_message("Construyendo el proyecto (agentes activos)..."))
 
             content = types.Content(role="user", parts=[types.Part(text=request_data)])

@@ -108,3 +108,32 @@ gcloud run jobs execute generate-mvp --wait
   mas calidad del orquestador o el default).
 - El job tiene timeout 3600 s; si se agota, subi `timeoutSeconds` en el yaml o
   reduci `MAX_FIX_ITERATIONS`.
+
+## Troubleshooting
+
+### "The user-provided container failed to start and listen on PORT=8080"
+
+Causa: el container tardaba en bindear el puerto porque importaba ADK/vertexai
+antes de levantar uvicorn y Cloud Run cortaba el startup.
+
+Fixes ya aplicados en el repo:
+- Los executors (`src/*/runtime/agent_executor.py`) importan
+  `vertexai`/`google.adk` recien en el primer task (lazy); el server bindea en
+  `0.0.0.0:$PORT` en segundos.
+- Los `agent_card.py` importan `vertexai` adentro de la funcion (no al importar
+  el modulo).
+- `infra/service.yaml.tpl` suma `startupProbe` TCP (timeout 300 s) y
+  `run.googleapis.com/startup-cpu-boost: "true"`.
+
+Despues de tocar codigo recorda recompilar con un tag nuevo y redeployar:
+
+```bash
+bash infra/deploy.sh build        # genera un TAG nuevo (fecha/hora)
+bash infra/deploy.sh services     # redeploya con la nueva imagen
+```
+
+Mirar logs del servicio:
+
+```bash
+gcloud run services logs read <backend|frontend|planner> --region us-central1 --limit 50
+```

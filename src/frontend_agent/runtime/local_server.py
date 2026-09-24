@@ -32,9 +32,8 @@ async def run_server():
     from .agent_card import create_frontend_card
     from .agent_executor import FrontendExecutor
 
-    from ..agent import root_agent
-
     print("Frontend Agent A2A server (implementa la vista de audiencia)")
+    print("El agente (ADK/vertexai) se inicializa al recibir el primer task.")
 
     card = create_frontend_card()
     card.url = PUBLIC_URL

@@ -16,6 +16,7 @@ spec:
     metadata:
       annotations:
         autoscaling.knative.dev/maxScale: "1"
+        run.googleapis.com/startup-cpu-boost: "true"
     spec:
       containerConcurrency: 1
       timeoutSeconds: 3600
@@ -33,6 +34,12 @@ spec:
               value: "yes"
             - name: PORT
               value: "8080"
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 300
+            periodSeconds: 1
+            failureThreshold: 3
           resources:
             limits:
               cpu: "2"

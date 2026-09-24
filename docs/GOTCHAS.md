@@ -1,5 +1,16 @@
 # GOTCHAS — trampas conocidas del Nivel 1
 
+## Cloud Run
+
+- Los executors y agent_cards importan `vertexai`/`google.adk` de forma lazy
+  (primer task / dentro de la funcion): el container bindea `0.0.0.0:$PORT` al
+  toque y no muere el startupProbe de Cloud Run. NO vuelvas a importarlos al
+  nivel de modulo, o reviviras el "failed to start and listen on PORT=8080".
+- El server escucha en `0.0.0.0` con el puerto de `$PORT` (Cloud Run inyecta
+  `8080`); nunca hardcodees `127.0.0.1` en un container.
+- `infra/service.yaml.tpl` lleva `startupProbe` TCP (300 s) + startup-cpu-boost;
+  si un agente tarda mas, subi el probe o la RAM/CPU del servicio.
+
 ## Deploy/entorno
 
 - `vertexai.init` solo se ejecuta si `GOOGLE_CLOUD_PROJECT` está seteado; con
