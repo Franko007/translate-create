@@ -140,6 +140,19 @@ bash infra/deploy.sh build        # genera un TAG nuevo (fecha/hora)
 bash infra/deploy.sh services     # redeploya con la nueva imagen
 ```
 
+### Si deployas con "gcloud run deploy --source ." (Buildpacks)
+
+Una imagen `cloud-run-source-deploy/...` en el servicio indica que se uso
+source-deploy, no nuestro Dockerfile. Ese flujo necesita `Procfile` + 
+`requirements.txt` en la raiz (ya estan en el repo). El Procfile arranca el
+planner; para otro agente cambia el modulo.
+
+```bash
+gcloud run deploy develop1 --source . \
+  --region europe-west1 --port=8080 --cpu=2 --memory=2Gi \
+  --service-account=nivel1-builder@high-magpie-509513-b6.iam.gserviceaccount.com
+```
+
 Mirar logs del servicio:
 
 ```bash
