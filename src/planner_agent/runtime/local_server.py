@@ -50,10 +50,26 @@ async def run_server():
     executor = PlannerExecutor()
     handler = DefaultRequestHandler(agent_executor=executor, task_store=InMemoryTaskStore())
     app = A2AStarletteApplication(agent_card=card, http_handler=handler)
-    config = uvicorn.Config(app.build(), host=AGENT_HOST, port=AGENT_PORT, log_level="info", loop="none")
+
+    from starlette.applications import Starlette
+    from starlette.responses import JSONResponse
+    from starlette.routing import Mount, Route
+
+    inner = app.build()
+    outer = Starlette(
+        routes=[
+            Route("/", endpoint=lambda _: JSONResponse({"status": "ok"}), methods=["GET"]),
+            Mount("/", app=inner),
+        ]
+    )
+
+    config = uvicorn.Config(outer, host=AGENT_HOST, port=AGENT_PORT, log_level="info", loop="none")
 
     print(f"Planner A2A: http://{AGENT_HOST}:{AGENT_PORT}")
     print(f"Agent card:  {PUBLIC_URL}/.well-known/agent-card.json")
+    print("=" * 60)
+    print("Los imports pesados (ADK/vertexai) se cargan recien en el primer task.")
+    print(f"Bindeando 0.0.0.0:{AGENT_PORT} (PORT={os.environ.get('PORT')})...")
     print("=" * 60)
     server = uvicorn.Server(config)
     await server.serve()
